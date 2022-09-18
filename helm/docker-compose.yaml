@@ -1,0 +1,14 @@
+version: '3.7'
+services:
+  qdiak-releaser:
+    image: ghcr.io/helmfile/helmfile:v0.145.5
+    command: bash
+    environment:
+      KUBECONFIG: '/root/.kube/qdiakdev.config.yaml'
+    env_file: './.env'
+    network_mode: host
+    working_dir: /wd
+    volumes:
+      - ./qdiak:/wd
+      - '${HOME}/.kube:/root/.kube'
+      - '${HOME}/.config/helm:/root/.config/helm'

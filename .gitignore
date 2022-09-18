@@ -1,0 +1,3 @@
+*.secrets.yaml
+*/***/*.env
+/helm/**/key.txt

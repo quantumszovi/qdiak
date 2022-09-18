@@ -1,0 +1,11 @@
+{
+  "[yaml]": {
+    "editor.codeActionsOnSave": {
+      "source.fixAll": false,
+      "source.fixAll.eslint": false
+    }
+  },
+  "[helm]": {
+    "editor.formatOnSave": false
+  }
+}

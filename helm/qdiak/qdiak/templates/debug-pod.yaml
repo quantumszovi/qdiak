@@ -1,0 +1,32 @@
+{{- if .Values.debug }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-debugger
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ .Release.Name }}-debugger
+  template:
+    metadata:
+      labels:
+        app: {{ .Release.Name }}-debugger
+    spec:
+      containers:
+      - name: debugger
+        image: ubuntu:latest
+        command: ['sleep', '3600000']
+        volumeMounts:
+          - mountPath: "/debug"
+            name: sites-dir
+        env: []
+      volumes:
+      - name: sites-dir
+        persistentVolumeClaim:
+          {{- if .Values.persistence.worker.existingClaim }}
+          claimName: {{ .Values.persistence.worker.existingClaim }}
+          {{- else }}
+          claimName: {{ template "erpnext.fullname" . }}
+          {{- end }}  
+{{- end }}
