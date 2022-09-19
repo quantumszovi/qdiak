@@ -5,7 +5,7 @@ metadata:
   labels:
     {{- include "erpnext.labels" . | nindent 4 }}
 spec:
-  replicas: {{ .Values.worker.short.replicaCount }}
+  replicas: {{ .Values.worker.sample.replicaCount }}
   selector:
     matchLabels:
       app.kubernetes.io/name: {{ include "erpnext.name" . }}-worker-s
@@ -23,37 +23,37 @@ spec:
       serviceAccountName: {{ template "erpnext.serviceAccountName" . }}
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
-    {{- if .Values.worker.short.initContainers }}
+    {{- if .Values.worker.sample.initContainers }}
       initContainers:
-        {{- toYaml .Values.worker.short.initContainers | nindent 8 }}
+        {{- toYaml .Values.worker.sample.initContainers | nindent 8 }}
     {{- end }}
       containers:
         - name: short
-          {{- if .Values.worker.short.envVars }}
+          {{- if .Values.worker.sample.envVars }}
           env:
-            {{- toYaml .Values.worker.short.envVars | nindent 12 }}
+            {{- toYaml .Values.worker.sample.envVars | nindent 12 }}
           {{- end }}
           args:
           - bench
           - worker
           - --queue
           - short
-          image: "{{ .Values.worker.image.repository }}:{{ .Values.worker.image.tag }}"
-          imagePullPolicy: {{ .Values.worker.image.pullPolicy }}
+          image: "{{ .Values.backend.deployment.image.repository }}:{{ .Values.backend.deployment.image.tag }}"
+          imagePullPolicy: {{ .Values.backend.deployment.image.pullPolicy }}
           livenessProbe:
-            {{- if .Values.worker.short.livenessProbe.override }}
-            {{- toYaml .Values.worker.short.livenessProbe.probe | nindent 12 }}
+            {{- if .Values.worker.sample.livenessProbe.override }}
+            {{- toYaml .Values.worker.sample.livenessProbe.probe | nindent 12 }}
             {{- else }}
             {{ tpl .Values.worker.healthProbe . | nindent 12 }}
             {{- end }}
           readinessProbe:
-            {{- if .Values.worker.short.readinessProbe.override }}
-            {{- toYaml .Values.worker.short.readinessProbe.probe | nindent 12 }}
+            {{- if .Values.worker.sample.readinessProbe.override }}
+            {{- toYaml .Values.worker.sample.readinessProbe.probe | nindent 12 }}
             {{- else }}
             {{ tpl .Values.worker.healthProbe . | nindent 12 }}
             {{- end }}
           resources:
-            {{- toYaml .Values.worker.short.resources | nindent 12 }}
+            {{- toYaml .Values.worker.sample.resources | nindent 12 }}
           securityContext:
             {{- toYaml .Values.securityContext | nindent 12 }}
           volumeMounts:
@@ -61,8 +61,8 @@ spec:
             mountPath: /home/frappe/frappe-bench/sites
           - name: logs
             mountPath: /home/frappe/frappe-bench/logs
-      {{- if .Values.worker.short.sidecars }}
-        {{- toYaml .Values.worker.short.sidecars | nindent 8 }}
+      {{- if .Values.worker.sample.sidecars }}
+        {{- toYaml .Values.worker.sample.sidecars | nindent 8 }}
       {{- end }}
       volumes:
         - name: sites-dir
@@ -89,15 +89,15 @@ spec:
           {{- else }}
           emptyDir: {}
           {{- end }}
-      {{- with .Values.worker.short.nodeSelector }}
+      {{- with .Values.worker.sample.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-    {{- with .Values.worker.short.affinity }}
+    {{- with .Values.worker.sample.affinity }}
       affinity:
         {{- toYaml . | nindent 8 }}
     {{- end }}
-    {{- with .Values.worker.short.tolerations }}
+    {{- with .Values.worker.sample.tolerations }}
       tolerations:
         {{- toYaml . | nindent 8 }}
     {{- end }}

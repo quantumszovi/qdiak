@@ -1,0 +1,15 @@
+This is the deployment chart of the QDIAK bundle.
+It contains all compute and networking resources.
+
+{{- if .Values.debug }}
+For debugging / viewing / editing the shared site assets (sites and common_site_config.json)
+you can attach to the debug pod as follows:
+
+kubectl -n {{ .Release.Namespace }} exec -it deploy/{{ .Release.Name }}-debugger -- bash
+
+You can find the attach volume in the /debug directory.
+{{- end }}
+
+{{- if .Values.ingress.enabled }}
+You can check the site on {{ (first .Values.ingress.hosts).host }}
+{{- end }}

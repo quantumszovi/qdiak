@@ -23,8 +23,8 @@ spec:
         runAsGroup: 1000
       containers:
       - name: configure
-        image: "{{ .Values.worker.image.repository }}:{{ .Values.worker.image.tag }}"
-        imagePullPolicy: {{ .Values.worker.image.pullPolicy }}
+        image: "{{ .Values.backend.deployment.image.repository }}:{{ .Values.backend.deployment.image.tag }}"
+        imagePullPolicy: {{ .Values.backend.deployment.image.pullPolicy }}
         command: ['bash', '-c']
         args:
           - >

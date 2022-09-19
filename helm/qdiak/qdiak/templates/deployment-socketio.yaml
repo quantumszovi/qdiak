@@ -5,7 +5,7 @@ metadata:
   labels:
     {{- include "erpnext.labels" . | nindent 4 }}
 spec:
-  replicas: {{ .Values.socketio.replicaCount }}
+  replicas: {{ .Values.socketio.deployment.replicaCount }}
   selector:
     matchLabels:
       app.kubernetes.io/name: {{ include "erpnext.name" . }}-socketio
@@ -23,37 +23,37 @@ spec:
       serviceAccountName: {{ template "erpnext.serviceAccountName" . }}
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
-    {{- if .Values.socketio.initContainers }}
+    {{- if .Values.socketio.deployment.initContainers }}
       initContainers:
-        {{- toYaml .Values.socketio.initContainers | nindent 8 }}
+        {{- toYaml .Values.socketio.deployment.initContainers | nindent 8 }}
     {{- end }}
       containers:
         - name: socketio
-          {{- if .Values.socketio.envVars }}
+          {{- if .Values.socketio.deployment.envVars }}
           env:
-            {{- toYaml .Values.socketio.envVars | nindent 12 }}
+            {{- toYaml .Values.socketio.deployment.envVars | nindent 12 }}
           {{- end }}
           securityContext:
             {{- toYaml .Values.securityContext | nindent 12 }}
-          image: "{{ .Values.socketio.image.repository }}:{{ .Values.socketio.image.tag }}"
+          image: "{{ .Values.socketio.deployment.image.repository }}:{{ .Values.socketio.deployment.image.tag }}"
           volumeMounts:
           - name: sites-dir
             mountPath: /home/frappe/frappe-bench/sites
           - name: logs
             mountPath: /home/frappe/frappe-bench/logs
-          imagePullPolicy: {{ .Values.socketio.image.pullPolicy }}
+          imagePullPolicy: {{ .Values.socketio.deployment.image.pullPolicy }}
           ports:
             - name: http
               containerPort: {{ .Values.socketio.service.port }}
               protocol: TCP
           livenessProbe:
-            {{- toYaml .Values.socketio.livenessProbe | nindent 12 }}
+            {{- toYaml .Values.socketio.deployment.livenessProbe | nindent 12 }}
           readinessProbe:
-            {{- toYaml .Values.socketio.readinessProbe | nindent 12 }}
+            {{- toYaml .Values.socketio.deployment.readinessProbe | nindent 12 }}
           resources:
-            {{- toYaml .Values.socketio.resources | nindent 12 }}
-      {{- if .Values.socketio.sidecars }}
-        {{- toYaml .Values.socketio.sidecars | nindent 8 }}
+            {{- toYaml .Values.socketio.deployment.resources | nindent 12 }}
+      {{- if .Values.socketio.deployment.sidecars }}
+        {{- toYaml .Values.socketio.deployment.sidecars | nindent 8 }}
       {{- end }}
       volumes:
         - name: sites-dir

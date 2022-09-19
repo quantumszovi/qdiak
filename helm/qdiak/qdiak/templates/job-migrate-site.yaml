@@ -21,8 +21,8 @@ spec:
         {{- toYaml $.Values.podSecurityContext | nindent 8 }}
       initContainers:
       - name: populate-assets
-        image: "{{ .Values.nginx.image.repository }}:{{ .Values.nginx.image.tag }}"
-        imagePullPolicy: {{ .Values.nginx.image.pullPolicy }}
+        image: "{{ .Values.frontend.deployment.image.repository }}:{{ .Values.frontend.deployment.image.tag }}"
+        imagePullPolicy: {{ .Values.frontend.deployment.image.pullPolicy }}
         command:
           - cp
           - -fR
@@ -38,8 +38,8 @@ spec:
             mountPath: /home/frappe/frappe-bench/sites/assets
       containers:
       - name: migrate
-        image: "{{ .Values.worker.image.repository }}:{{ .Values.worker.image.tag }}"
-        imagePullPolicy: {{ .Values.worker.image.pullPolicy }}
+        image: "{{ .Values.backend.deployment.image.repository }}:{{ .Values.backend.deployment.image.tag }}"
+        imagePullPolicy: {{ .Values.backend.deployment.image.pullPolicy }}
         command: ["bash", "-c"]
         args:
           - >

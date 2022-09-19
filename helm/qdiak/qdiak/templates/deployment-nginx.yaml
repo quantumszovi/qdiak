@@ -5,7 +5,7 @@ metadata:
   labels:
     {{- include "erpnext.labels" . | nindent 4 }}
 spec:
-  replicas: {{ .Values.nginx.replicaCount }}
+  replicas: {{ .Values.frontend.deployment.replicaCount }}
   selector:
     matchLabels:
       app.kubernetes.io/name: {{ include "erpnext.name" . }}-nginx
@@ -27,29 +27,29 @@ spec:
         - name: nginx
           env:
             - name: "BACKEND"
-              value: {{ print (include "erpnext.fullname" .) "-gunicorn:" .Values.worker.gunicorn.service.port }}
+              value: {{ print (include "erpnext.fullname" .) "-gunicorn:" .Values.backend.service.port }}
             - name: "SOCKETIO"
               value: {{ print (include "erpnext.fullname" .) "-socketio:" .Values.socketio.service.port }}
             - name: "UPSTREAM_REAL_IP_ADDRESS"
-              value: {{ .Values.nginx.environment.upstreamRealIPAddress | quote }}
+              value: {{ .Values.frontend.environment.upstreamRealIPAddress | quote }}
             - name: "UPSTREAM_REAL_IP_RECURSIVE"
-              value: {{ .Values.nginx.environment.upstreamRealIPRecursive | quote }}
+              value: {{ .Values.frontend.environment.upstreamRealIPRecursive | quote }}
             - name: "UPSTREAM_REAL_IP_HEADER"
-              value: {{ .Values.nginx.environment.upstreamRealIPHeader }}
+              value: {{ .Values.frontend.environment.upstreamRealIPHeader }}
             - name: "FRAPPE_SITE_NAME_HEADER"
-              value: {{ .Values.nginx.environment.frappeSiteNameHeader }}
-          image: "{{ .Values.nginx.image.repository }}:{{ .Values.nginx.image.tag }}"
-          imagePullPolicy: {{ .Values.nginx.image.pullPolicy }}
+              value: {{ .Values.frontend.environment.frappeSiteNameHeader }}
+          image: "{{ .Values.frontend.deployment.image.repository }}:{{ .Values.frontend.deployment.image.tag }}"
+          imagePullPolicy: {{ .Values.frontend.deployment.image.pullPolicy }}
           ports:
             - name: http
-              containerPort: {{ .Values.nginx.service.port }}
+              containerPort: {{ .Values.frontend.service.port }}
               protocol: TCP
           livenessProbe:
-            {{- toYaml .Values.nginx.livenessProbe | nindent 12 }}
+            {{- toYaml .Values.frontend.deployment.livenessProbe | nindent 12 }}
           readinessProbe:
-            {{- toYaml .Values.nginx.readinessProbe | nindent 12 }}
+            {{- toYaml .Values.frontend.deployment.readinessProbe | nindent 12 }}
           resources:
-            {{- toYaml .Values.nginx.resources | nindent 12 }}
+            {{- toYaml .Values.frontend.deployment.resources | nindent 12 }}
           securityContext:
             {{- toYaml .Values.securityContext | nindent 12 }}
           volumeMounts:
@@ -72,20 +72,20 @@ spec:
           {{- else }}
           emptyDir: {}
           {{- end }}
-        {{- if .Values.nginx.image.nginxConfig }}
+        {{- if .Values.frontend.deployment.image.nginxConfig }}
         - name: nginx-config
           configMap:
             name: {{ include "erpnext.fullname" . }}-nginx-config
         {{- end }}
-      {{- with .Values.nginx.nodeSelector }}
+      {{- with .Values.frontend.deployment.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-    {{- with .Values.nginx.affinity }}
+    {{- with .Values.frontend.deployment.affinity }}
       affinity:
         {{- toYaml . | nindent 8 }}
     {{- end }}
-    {{- with .Values.nginx.tolerations }}
+    {{- with .Values.frontend.deployment.tolerations }}
       tolerations:
         {{- toYaml . | nindent 8 }}
     {{- end }}

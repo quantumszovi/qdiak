@@ -1,0 +1,59 @@
+# This file specifies configuration values that would be likely to change deployment-to-deployment.
+# Create a variant of this file for each environment: values.<environment_name>.yaml
+
+################################################################################################################################################
+
+imagePullSecrets: []
+debug: true # creates ubuntu debug-container with sites-volume attached under /debug
+
+frontend:
+  deployment:
+    replicaCount: 1
+    image:
+      repository: frappe/frappe-nginx
+      tag: v14
+      pullPolicy: IfNotPresent
+    resources: {}
+
+backend:
+  deployment:
+    replicaCount: 1
+    image:
+      repository: frappe/frappe-worker
+      tag: v14
+      pullPolicy: IfNotPresent
+    resources: {}
+
+persistence:
+  worker:
+    enabled: true
+    existingClaim: qdiak-sites
+    size: 8Gi
+    storageClass: "nfs"
+  logs:
+    # Container based log search and analytics stack recommended
+    enabled: false
+    existingClaim: qdiak-logs
+    size: 8Gi
+    storageClass: "nfs"
+
+ingress:
+  enabled: true
+  ingressName: "erp-example-com"
+  annotations:
+    # cert-manager.io/cluster-issuer: letsencrypt-prod
+    kubernetes.io/ingress.class: nginx
+    kubernetes.io/tls-acme: "true"
+    nginx.ingress.kubernetes.io/upstream-vhost: "qdiak.example"
+    nginx.ingress.kubernetes.io/rewrite-target: '/$1'
+    nginx.ingress.kubernetes.io/configuration-snippet: "proxy_set_header Host \"qdiak.example\""
+  
+  hosts:
+  - paths:
+    - path: /
+      pathType: ImplementationSpecific
+    host: "qdiak.example"
+  # tls:
+  #  - secretName: erp-example-com-tls
+  #    hosts:
+  #      - erp.example.com

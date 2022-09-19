@@ -5,7 +5,7 @@ metadata:
   labels:
     {{- include "erpnext.labels" . | nindent 4 }}
 spec:
-  replicas: {{ .Values.worker.gunicorn.replicaCount }}
+  replicas: {{ .Values.backend.deployment.replicaCount }}
   selector:
     matchLabels:
       app.kubernetes.io/name: {{ include "erpnext.name" . }}-gunicorn
@@ -25,12 +25,12 @@ spec:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
       initContainers:
         - name: populate-assets
-          {{- if .Values.worker.gunicorn.envVars }}
+          {{- if .Values.backend.deployment.envVars }}
           env:
-            {{- toYaml .Values.worker.gunicorn.envVars | nindent 12 }}
+            {{- toYaml .Values.backend.deployment.envVars | nindent 12 }}
           {{- end }}
-          image: "{{ .Values.nginx.image.repository }}:{{ .Values.nginx.image.tag }}"
-          imagePullPolicy: {{ .Values.nginx.image.pullPolicy }}
+          image: "{{ .Values.frontend.deployment.image.repository }}:{{ .Values.frontend.deployment.image.tag }}"
+          imagePullPolicy: {{ .Values.frontend.deployment.image.pullPolicy }}
           command:
             - cp
             - -fR
@@ -42,20 +42,20 @@ spec:
           volumeMounts:
             - name: assets-cache
               mountPath: /home/frappe/frappe-bench/sites/assets
-      {{- if .Values.worker.gunicorn.initContainers }}
-        {{- toYaml .Values.worker.gunicorn.initContainers | nindent 8 }}
+      {{- if .Values.backend.deployment.initContainers }}
+        {{- toYaml .Values.backend.deployment.initContainers | nindent 8 }}
       {{- end }}
       containers:
         - name: gunicorn
-          {{- if .Values.worker.gunicorn.envVars }}
+          {{- if .Values.backend.deployment.envVars }}
           env:
-            {{- toYaml .Values.worker.gunicorn.envVars | nindent 12 }}
+            {{- toYaml .Values.backend.deployment.envVars | nindent 12 }}
           {{- end }}
           args:
-            {{- toYaml .Values.worker.gunicorn.args | nindent 12 }}
+            {{- toYaml .Values.backend.deployment.args | nindent 12 }}
           securityContext:
             {{- toYaml .Values.securityContext | nindent 12 }}
-          image: "{{ .Values.worker.image.repository }}:{{ .Values.worker.image.tag }}"
+          image: "{{ .Values.backend.deployment.image.repository }}:{{ .Values.backend.deployment.image.tag }}"
           volumeMounts:
           - name: assets-cache
             mountPath: /home/frappe/frappe-bench/sites/assets
@@ -65,17 +65,17 @@ spec:
             mountPath: /home/frappe/frappe-bench/logs
           ports:
             - name: http
-              containerPort: {{ .Values.worker.gunicorn.service.port }}
+              containerPort: {{ .Values.backend.service.port }}
               protocol: TCP
-          imagePullPolicy: {{ .Values.worker.image.pullPolicy }}
+          imagePullPolicy: {{ .Values.backend.deployment.image.pullPolicy }}
           livenessProbe:
-            {{- toYaml .Values.worker.gunicorn.livenessProbe | nindent 12 }}
+            {{- toYaml .Values.backend.deployment.livenessProbe | nindent 12 }}
           readinessProbe:
-            {{- toYaml .Values.worker.gunicorn.readinessProbe | nindent 12 }}
+            {{- toYaml .Values.backend.deployment.readinessProbe | nindent 12 }}
           resources:
-            {{- toYaml .Values.worker.gunicorn.resources | nindent 12 }}
-      {{- if .Values.worker.gunicorn.sidecars }}
-        {{- toYaml .Values.worker.gunicorn.sidecars | nindent 8 }}
+            {{- toYaml .Values.backend.deployment.resources | nindent 12 }}
+      {{- if .Values.backend.deployment.sidecars }}
+        {{- toYaml .Values.backend.deployment.sidecars | nindent 8 }}
       {{- end }}
       volumes:
         - name: assets-cache
@@ -104,15 +104,15 @@ spec:
           {{- else }}
           emptyDir: {}
           {{- end }}
-      {{- with .Values.worker.gunicorn.nodeSelector }}
+      {{- with .Values.backend.deployment.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-    {{- with .Values.worker.gunicorn.affinity }}
+    {{- with .Values.backend.deployment.affinity }}
       affinity:
         {{- toYaml . | nindent 8 }}
     {{- end }}
-    {{- with .Values.worker.gunicorn.tolerations }}
+    {{- with .Values.backend.deployment.tolerations }}
       tolerations:
         {{- toYaml . | nindent 8 }}
     {{- end }}

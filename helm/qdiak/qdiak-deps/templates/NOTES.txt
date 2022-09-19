@@ -1,0 +1,21 @@
+This chart contains the dependency resources of the QDIAK bundle.
+This is due to creation-order conflicts in the default ERPNext chart (https://github.com/frappe/helm)
+
+These resources are:
+{{- if .Values.persistence.worker.enabled }}
+- PVC for site assets: {{ .Values.persistence.worker.existingClaim }}
+{{- end }}
+{{- if .Values.persistence.logs.enabled }}
+- PVC for frappe logs: {{ .Values.persistence.logs.existingClaim }}
+{{- end }}
+{{- if .Values.mariadb.enabled }}
+- Secret containing MariaDB credentials: {{ .Values.mariadb.auth.existingSecret }}  (note that values stored in common_site_config.json are used by the deployments)
+{{- end }}
+{{- if .Values.serviceAccount.create }}
+- ServiceAccount to be used by resources: {{ include "erpnext.serviceAccountName" . }}
+{{- end }}
+
+
+IMPORTANT!
+
+Uninstalling this chart deletes the namespace to which it was installed!

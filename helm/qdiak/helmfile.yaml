@@ -1,3 +1,8 @@
+# Main helmfile for QDIAK bundle.
+# Define separate environments for different deployment targets
+
+#######################################################################################################################################
+
 repositories:
 - name: stable
   url: https://charts.helm.sh/stable
@@ -16,10 +21,10 @@ commonLabels:
   # currently the only app is qdiak which is the main site
   qdiak-app: qdiak
 
-helmfiles:
-  - path: helmfile.deps.yaml
-    values:
-    - 'values.default.yaml'
+environments: 
+  default: {}
+  frappe: {}
+  qdiak-test: {}
 
 releases:
 - chart: ./qdiak
@@ -29,6 +34,40 @@ releases:
   timeout: 1800 # 30mins due to initial install job taking extremely long
   cleanupOnFail: true
   values:
-  - 'values.default.yaml'
+  - '_values/values.yaml'
+  - '_values/values.{{- .Environment.Name }}.yaml'
   secrets:
-  - 'secrets/secrets.{{- .Environment.Name }}.yaml'
+  - '_secrets/secrets.{{- .Environment.Name }}.yaml'
+  needs:
+  - 'qdiak-deps-{{- .Environment.Name }}'
+  - nfs-server/nfs-server
+- chart: ./qdiak-deps
+  installed: true
+  name: qdiak-deps-{{- .Environment.Name }}
+  namespace: qdiak-{{- .Environment.Name }}
+  timeout: 300
+  cleanupOnFail: true
+  values:
+  - '_values/values.yaml'
+  - '_values/values.{{- .Environment.Name}}.yaml'
+  secrets:
+  - '_secrets/secrets.{{- .Environment.Name }}.yaml'
+  needs:
+  - nfs-server/nfs-server
+  # hooks:
+  #   - events: ["postuninstall"]
+  #     showlogs: true
+  #     # Causes issues with finalizers and namespace usually doesnt get deleted
+  #     command: kubectl
+  #     args: ["delete", "ns", "qdiak-{{- .Environment.Name }}"]
+
+- chart: stable/nfs-server-provisioner
+  installed: true
+  name: nfs-server
+  namespace: nfs-server
+  cleanupOnFail: true
+  values:
+    - persistence:
+        enabled: true
+        storageClass: do-block-storage
+        size: 200Gi
