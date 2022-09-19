@@ -1,0 +1,18 @@
+version: '3.7'
+services:
+  builder:
+    build:
+      context: .
+      dockerfile: builder.Dockerfile
+    image: 'ghcr.io/qdiak/qdiak/frappe-builder:local'
+    command: ash
+    working_dir: /wd
+    privileged: true
+    env_file: .env
+    volumes:
+      - './:/wd'
+      - './compose.yaml:/wd/docker-compose.yaml'
+      - '/var/run/docker.sock:/var/run/docker.sock'
+      - temp:/temp
+volumes:
+  temp:
